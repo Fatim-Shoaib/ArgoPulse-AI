@@ -1,0 +1,14 @@
+{
+  "generation_model_name": "gemini-1.5-pro-latest",
+  "tokenizer_model_name": "models/gemini-1.5-flash-latest",
+  "ignore_dirs": [
+    "__pycache__",
+    ".git",
+    "venv",
+    ".vscode"
+  ],
+  "ignore_files": [
+    ".gitignore",
+    "config.json"
+  ]
+}

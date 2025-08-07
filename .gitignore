@@ -10,4 +10,8 @@ __pycache__/
 
 # Generated output files
 structure.txt
+*-output/
 consolidated_content.json
+
+# Local configuration file
+config.json

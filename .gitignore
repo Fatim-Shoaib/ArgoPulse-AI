@@ -1,0 +1,13 @@
+# Virtual Environment
+venv/
+
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Generated output files
+structure.txt
+consolidated_content.json

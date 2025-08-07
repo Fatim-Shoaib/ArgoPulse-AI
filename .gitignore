@@ -15,3 +15,6 @@ consolidated_content.json
 
 # Local configuration file
 config.json
+
+# Log files
+*.log

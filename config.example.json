@@ -5,13 +5,11 @@
     "__pycache__",
     ".git",
     "venv",
-    ".vscode",
-    "node_modules"
+    ".vscode"
   ],
   "ignore_files": [
     ".gitignore",
-    "config.json",
-    "package-lock.json"
+    "config.json"
   ],
   "binary_file_extensions": [
     ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".ico",
@@ -22,5 +20,13 @@
     ".exe", ".dll",
     ".pyc",
     ".ttf", ".otf", ".woff", ".woff2"
-  ]
+  ],
+  "data_file_extensions": [
+    ".csv",
+    ".json",
+    ".tsv",
+    ".parquet",
+    ".xml"
+  ],
+  "data_file_head_lines": 5
 }

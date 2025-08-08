@@ -1,28 +1,27 @@
 # ArgoPulse AI
 
-ArgoPulse AI is an intelligent, agentic framework designed to analyze and prepare multi-file software projects for summarization by Large Language Models (LLMs). It intelligently filters out irrelevant files and consolidates the essential code into a clean format, making it perfect for efficient and accurate code analysis.
+ArgoPulse AI is an intelligent, agentic framework designed to analyze software projects and generate multi-level technical summaries. It streamlines the process of understanding complex codebases by automating data collection, filtering, and documentation generation.
 
-## Overview
+## The ArgoPulse Workflow
 
-When trying to understand a large codebase, much of the content (dependency folders, build artifacts, images, boilerplate configs) is just noise. ArgoPulse AI tackles this problem by:
+The tool operates in a two-step workflow, allowing for flexibility and efficiency:
 
-1.  **Scanning** a project's entire file structure.
-2.  **Intelligently Filtering** the structure using a combination of pre-configured rules and LLM-powered analysis to decide what's important.
-3.  **Generating** clean outputs: a final file tree and a consolidated content file containing only the relevant code.
+1.  **Analyze (`--analyze`):** First, the tool scans a project directory. It intelligently filters out irrelevant "noise" (like dependency folders, build artifacts, and binary files) and produces two key artifacts:
+    *   `structure.txt`: A clean, tree-like representation of the project's essential files.
+    *   `consolidated_content.json`: A single JSON file containing the code and content of all relevant files.
+    This step only needs to be run once per project, or whenever the code changes significantly.
 
-This process ensures that the context provided to a final summarization LLM is dense, relevant, and cost-effective (by reducing token count).
+2.  **Summarize (`--summarize`):** Once the analysis files exist, you can generate technical summaries at different levels of detail (low, medium, or high). This step uses the analysis artifacts as context for a powerful Large Language Model (LLM), which writes the documentation. You can re-run this step to generate different summary levels without re-analyzing the project.
 
 ## Features
 
--   **Hierarchical Structure Generation:** Creates a clean, visual tree of the project's file structure.
--   **Code Consolidation:** Combines the contents of all relevant files into a single, structured JSON file.
--   **LLM-Powered Intelligent Filtering:** Uses the Gemini API to analyze the file structure and programmatically identify and exclude irrelevant files and folders (like `node_modules`, `dist/`, etc.).
--   **Configurable and Extensible:** All settings, including model names, ignored files, and binary extensions, are managed in a simple `config.json` file.
--   **Token Counting:** Calculates the total token count of the final consolidated content to estimate API costs.
+-   **Two-Step Process:** Analyze and summarize independently for maximum efficiency.
+-   **Multi-Level Summaries:** Generate high-level, medium-level, and low-level documentation to suit different needs.
+-   **LLM-Powered Filtering:** Optionally use an LLM during the analysis phase to programmatically identify and exclude boilerplate and irrelevant files.
+-   **Intelligent Content Handling:** Includes code files fully but only includes previews of large data files (like `.csv`) to save tokens.
+-   **Fully Configurable:** Control model names, ignore lists, and other settings via a simple `config.json` file.
 
 ## Getting Started
-
-Follow these steps to get the project set up and running on your local machine.
 
 ### Prerequisites
 
@@ -38,16 +37,8 @@ Follow these steps to get the project set up and running on your local machine.
     ```
 
 2.  **Create and activate a virtual environment:**
-    -   On **Windows**:
-        ```cmd
-        python -m venv venv
-        venv\Scripts\activate
-        ```
-    -   On **macOS / Linux**:
-        ```bash
-        python -m venv venv
-        source venv/bin/activate
-        ```
+    -   On **Windows**: `python -m venv venv && venv\Scripts\activate`
+    -   On **macOS / Linux**: `python -m venv venv && source venv/bin/activate`
 
 3.  **Install the required dependencies:**
     ```bash
@@ -56,67 +47,79 @@ Follow these steps to get the project set up and running on your local machine.
 
 ### Configuration
 
-Configuration is split into two main files:
-
 1.  **API Key (`.env` file):**
-    -   This file stores your secret Google Gemini API key. It is **not** committed to Git.
-    -   Create a file named `.env` in the root of the project by copying the provided example:
-        -   **Windows:** `copy .env.example .env`
-        -   **macOS/Linux:** `cp .env.example .env`
-    -   Open the new `.env` file and add your API key:
+    -   Copy the example file: `copy .env.example .env` (Windows) or `cp .env.example .env` (macOS/Linux).
+    -   Open the new `.env` file and add your Google Gemini API key:
         ```
         GEMINI_API_KEY="your_google_ai_studio_api_key_here"
         ```
 
 2.  **Models and Settings (`config.json` file):**
-    -   This file controls the behavior of the script, such as which models to use and what files/folders to ignore by default.
-    -   Copy the example configuration to create your local version:
-        -   **Windows:** `copy config.example.json config.json`
-        -   **macOS/Linux:** `cp config.example.json config.json`
-    -   You can now edit `config.json` to change models or add to the ignore lists.
-        -   `generation_model_name`: The model used for intelligent filtering.
-        -   `tokenizer_model_name`: The model used for counting tokens.
-        -   `ignore_dirs`, `ignore_files`: Default lists of items to always ignore.
+    -   Copy the example file: `copy config.example.json config.json` (Windows) or `cp config.example.json config.json` (macOS/Linux).
+    -   Edit `config.json` to change the default models, add files/folders to the ignore lists, or define new data file types.
 
 ## Usage
 
-The script is run from the command line, pointing it to the project you want to analyze.
+The script is run from the command line, specifying the project to process and the actions to perform.
 
 ### Command-Line Arguments
 
-python main.py <project_directory> [options]
+```
+python main.py <project_path> [--analyze] [--summarize low|medium|high] [options]
+```
 
+-   `project_path` (Required): The path to the project folder you want to process.
+-   `--analyze`: Perform the analysis step. Creates the `structure.txt` and `consolidated_content.json` files.
+-   `--summarize <levels...>`: Perform the summarization step. Can accept one or more levels: `low`, `medium`, `high`.
+-   `--intelligent-filter`: (Optional, with `--analyze`) Use an LLM to help filter files during analysis.
+-   `--count-tokens`: (Optional, with `--analyze`) Count the tokens of the consolidated content.
 
--   **`project_directory`** (Required): The path to the project folder you want to analyze.
--   **`--count-tokens`** (Optional): If set, the script will calculate and display the total token count of the final consolidated content.
--   **`--intelligent-filter`** (Optional): If set, the script will use an LLM to analyze the project structure and intelligently add files and folders to the ignore list before generating the final output.
+### Example Workflow
 
-### Example Commands
+Let's assume you have a project located at `C:/Code/my-app`.
 
-Let's assume you have a project located at `C:/Users/You/Projects/my-web-app`.
+**Step 1: Analyze the Project**
 
-1.  **Basic Analysis:**
-    -   Generates `structure.txt` and `consolidated_content.json` using only the rules from `config.json`.
+First, run the analysis. We'll use the intelligent filter for the best results.
+
+```bash
+python main.py C:/Code/my-app --analyze --intelligent-filter
+```
+This creates a `my-app-output` folder containing the analysis files.
+
+**Step 2: Generate Summaries**
+
+Now that the analysis is done, you can generate any summary you need.
+
+-   **To get a high-level overview:**
     ```bash
-    python main.py C:/Users/You/Projects/my-web-app
+    python main.py C:/Code/my-app --summarize high
     ```
 
-2.  **Analysis with Token Count:**
-    -   Does the basic analysis and also reports the total token count.
+-   **To get a very detailed, low-level summary:**
     ```bash
-    python main.py C:/Users/You/Projects/my-web-app --count-tokens
+    python main.py C:/Code/my-app --summarize low
     ```
 
-3.  **Full Intelligent Analysis:**
-    -   The most powerful mode. It uses the LLM to filter the project, generates the final outputs, and counts the tokens of the filtered result.
+-   **To get all three summaries at once:**
     ```bash
-    python main.py C:/Users/You/Projects/my-web-app --intelligent-filter --count-tokens
+    python main.py C:/Code/my-app --summarize low medium high
     ```
+
+You can also perform both actions in a single command:
+```bash
+python main.py C:/Code/my-app --analyze --summarize medium
+```
 
 ## Output
 
-After running, the script will create a new folder in your `ArgoPulse-AI` directory named `<project_name>-output`. This folder will contain:
+All output is saved in a new folder named `<project_name>-output`.
 
--   **`structure.txt`**: A clean, tree-like representation of the final, filtered file structure.
--   **`consolidated_content.json`**: A JSON file containing the relative paths and full text content of every file included in the final structure.
--   **`llm_filter_analysis.json`** (if `--intelligent-filter` is used): A JSON file showing exactly which files and folders the LLM decided to ignore. This is useful for debugging the filtering process.
+-   **Analysis Files:**
+    -   `structure.txt`: The filtered project file tree.
+    -   `consolidated_content.json`: The consolidated code and content.
+    -   `llm_filter_analysis.json` (Optional): The LLM's decisions during intelligent filtering.
+-   **Summary Files:**
+    -   `high_level_summary.md`
+    -   `medium_level_summary.md`
+    -   `low_level_summary.md`

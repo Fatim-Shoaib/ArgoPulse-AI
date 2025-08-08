@@ -34,35 +34,6 @@ def load_config():
         logger.warning("config.json not found or invalid. Using default settings.")
         return default_config
 
-# --- Core Functions (API Calls) ---
-# def get_llm_filter_list(structure_string: str, config: dict) -> dict:
-#     api_key = os.getenv("GEMINI_API_KEY")
-#     if not api_key:
-#         logger.error("Cannot perform intelligent filtering: GEMINI_API_KEY not found.")
-#         return {"ignore_folders": [], "ignore_files": []}
-    
-#     os.environ['GOOGLE_API_KEY'] = api_key
-#     prompt = f"""
-# You are an expert software developer...
-# Analyze this file structure:
-# ---
-# {structure_string}
-# ---
-# Your response MUST be a valid JSON object...
-# """
-#     try:
-#         llm_model = config['generation_model_name']
-#         client = genai.Client()
-#         response = client.models.generate_content(model=llm_model, contents=prompt)
-#         cleaned_response = response.text.strip().replace("```json", "").replace("```", "")
-#         filter_data = json.loads(cleaned_response)
-#         logger.info(f"LLM suggested ignoring: {filter_data}")
-#         return filter_data
-#     except Exception as e:
-#         logger.error(f"An error occurred during LLM filtering: {e}")
-#         logger.debug("Traceback:", exc_info=True)
-#         return {"ignore_folders": [], "ignore_files": []}
-
 def get_llm_filter_list(structure_string: str, config: dict) -> dict:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -118,26 +89,6 @@ Example response format:
         logger.error(f"An error occurred during LLM filtering. Check log for details. Error: {e}")
         logger.debug("Traceback:", exc_info=True)
         return {"ignore_folders": [], "ignore_files": []}
-
-
-# def count_project_tokens(consolidated_data: list, config: dict) -> int:
-#     api_key = os.getenv("GEMINI_API_KEY")
-#     if not api_key:
-#         logger.warning("GEMINI_API_KEY not found.")
-#         return 0
-#     os.environ['GOOGLE_API_KEY'] = api_key
-#     tokenizer_model = config['tokenizer_model_name']
-#     full_prompt_string = "Project content:\n\n"
-#     for file_info in consolidated_data:
-#         full_prompt_string += f"--- File: {file_info['path']} ---\n{file_info['content']}\n\n"
-#     try:
-#         client = genai.Client()
-#         response = client.models.count_tokens(model=tokenizer_model, contents=full_prompt_string)
-#         return response.total_tokens
-#     except Exception as e:
-#         logger.error(f"Could not count tokens: {e}")
-#         logger.debug("Traceback:", exc_info=True)
-#         return 0
 
 def count_project_tokens(consolidated_data: list, config: dict) -> int:
     api_key = os.getenv("GEMINI_API_KEY")
@@ -200,17 +151,6 @@ Here is the content of the project files:
         logger.debug("Traceback:", exc_info=True)
         return ""
 
-
-# --- File Processing Functions ---
-# def discover_all_paths(root_dir: Path, config: dict) -> list[Path]:
-#     all_paths = []
-#     initial_ignore_dirs = set(config.get('ignore_dirs', []))
-#     for root, dirs, files in os.walk(root_dir, topdown=True):
-#         dirs[:] = [d for d in dirs if d not in initial_ignore_dirs]
-#         for name in files: all_paths.append(Path(root) / name)
-#         for name in dirs: all_paths.append(Path(root) / name)
-#     return all_paths
-
 def discover_all_paths(root_dir: Path, config: dict) -> list[Path]:
     all_paths = []
     initial_ignore_dirs = set(config.get('ignore_dirs', []))
@@ -221,21 +161,6 @@ def discover_all_paths(root_dir: Path, config: dict) -> list[Path]:
         for name in dirs:
             all_paths.append(Path(root) / name)
     return all_paths
-
-# def build_file_tree(paths: list[Path], root_dir: Path):
-#     tree = {'name': root_dir.name, 'type': 'directory', 'children': []}
-#     for path in sorted(paths):
-#         current_level = tree['children']
-#         relative_parts = path.relative_to(root_dir).parts
-#         for i, part in enumerate(relative_parts):
-#             node = next((child for child in current_level if child['name'] == part), None)
-#             if not node:
-#                 is_last_part = i == len(relative_parts) - 1
-#                 node_type = 'file' if path.is_file() and is_last_part else 'directory'
-#                 node = {'name': part, 'type': node_type, 'children': []}
-#                 current_level.append(node)
-#             current_level = node['children']
-#     return tree
 
 def build_file_tree(paths: list[Path], root_dir: Path):
     tree = {'name': root_dir.name, 'type': 'directory', 'children': []}
@@ -256,19 +181,6 @@ def build_file_tree(paths: list[Path], root_dir: Path):
             current_level = node['children']
     return tree
 
-# def format_tree(node, prefix=""):
-#     lines = []
-#     children = sorted(node.get('children', []), key=lambda x: (x['type'], x['name']))
-#     for i, child in enumerate(children):
-#         is_last = i == len(children) - 1
-#         connector = "└── " if is_last else "├── "
-#         name = child['name'] + ('/' if child['type'] == 'directory' else '')
-#         lines.append(f"{prefix}{connector}{name}")
-#         if child.get('children'):
-#             new_prefix = prefix + ("    " if is_last else "│   ")
-#             lines.extend(format_tree(child, new_prefix))
-#     return lines
-
 def format_tree(node, prefix=""):
     lines = []
     children = sorted(node.get('children', []), key=lambda x: (x['type'], x['name']))
@@ -282,12 +194,6 @@ def format_tree(node, prefix=""):
             new_prefix = prefix + ("    " if is_last else "│   ")
             lines.extend(format_tree(child, new_prefix))
     return lines
-
-# def is_path_ignored(relative_path_str: str, full_ignore_list: list) -> bool:
-#     for item in full_ignore_list:
-#         if item.endswith('/') and relative_path_str.startswith(item): return True
-#         elif not item.endswith('/') and relative_path_str == item: return True
-#     return False
 
 def is_path_ignored(relative_path_str: str, full_ignore_list: list) -> bool:
     for item in full_ignore_list:
